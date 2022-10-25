@@ -4,8 +4,8 @@ const next = document.getElementById("next");
 
 const urlImg = [
     
-    "./assets/img/bastille.jpg", 
-    "./assets/img/hellfest.jpg"
+    "./assets/img/diablo.jpg", 
+   
 ];
 
 let i = 0

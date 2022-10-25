@@ -3,16 +3,17 @@
 namespace App\Controller;
 
 use App\Entity\User;
+use Gumlet\ImageResize;
 use App\Form\RegistrationFormType;
-use App\Security\AuntenticatorAuthenticator;
 use Doctrine\ORM\EntityManagerInterface;
-use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use App\Security\AuntenticatorAuthenticator;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 use Symfony\Contracts\Translation\TranslatorInterface;
+use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
+use Symfony\Component\Security\Http\Authentication\UserAuthenticatorInterface;
 
 class RegistrationController extends AbstractController
 {
@@ -26,7 +27,16 @@ class RegistrationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+           
+            $dirUpload=str_replace("\\","/",$this->getParameter('upload_directory')."/");
+            $dirAvatar=str_replace("\\","/",$this->getParameter('avatar_directory')."/");
+            
             if($form->get('plainPassword')->getData() === $form->get('confirmPassword')->getData() ){
+               
+                move_uploaded_file($_FILES['registration_form']['tmp_name']['avatar'],$dirUpload.$_FILES['registration_form']['name']['avatar']);
+              
+
+
                 $user->setRoles(['ROLE_USER']);
                 // encode the plain password
                 $user->setPassword(
@@ -38,6 +48,11 @@ class RegistrationController extends AbstractController
 
                 $entityManager->persist($user);
                 $entityManager->flush();
+                
+                $image= new ImageResize($dirUpload.$_FILES['registration_form']['name']['avatar']);
+                $image->resizeToWidth(100);
+                $image->save($dirAvatar.$user->getId().".webP",IMAGETYPE_WEBP);
+                unlink($dirUpload.$_FILES['registration_form']['name']['avatar']);
                 // do anything else you need here, like send an email
 
                 return $userAuthenticator->authenticateUser(
