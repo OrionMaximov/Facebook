@@ -30,6 +30,7 @@ class RegistrationController extends AbstractController
            
             $dirUpload=str_replace("\\","/",$this->getParameter('upload_directory')."/");
             $dirAvatar=str_replace("\\","/",$this->getParameter('avatar_directory')."/");
+            $dirAvatarX=str_replace("\\","/",$this->getParameter('avatarx256_directory')."/");
             
             if($form->get('plainPassword')->getData() === $form->get('confirmPassword')->getData() ){
                
@@ -52,6 +53,10 @@ class RegistrationController extends AbstractController
                 $image= new ImageResize($dirUpload.$_FILES['registration_form']['name']['avatar']);
                 $image->resizeToWidth(100);
                 $image->save($dirAvatar.$user->getId().".webP",IMAGETYPE_WEBP);
+                $image2= new ImageResize($dirUpload.$_FILES['registration_form']['name']['avatar']);
+                $image2->resizeToWidth(256);
+                $image2->save($dirAvatarX.$user->getId()."x256.webP",IMAGETYPE_WEBP);
+
                 unlink($dirUpload.$_FILES['registration_form']['name']['avatar']);
                 // do anything else you need here, like send an email
 
